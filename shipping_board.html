@@ -3,119 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daily Shipping Monitor & Analytics</title>
+    <title>Shipping Monitor - Fail Proof Edition</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Arial Black', sans-serif; background-color: #121212; color: #FFFFFF; padding: 15px; display: flex; flex-direction: column; height: 100vh; overflow: hidden; position: relative; }
+        body { font-family: sans-serif; background-color: #121212; color: #FFF; padding: 15px; }
         
-        /* Layout Header */
-        header { display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid #333; padding-bottom: 10px; margin-bottom: 15px; flex-shrink: 0; }
-        h1 { font-size: 2.5rem; color: #00FF66; letter-spacing: 1px; }
-        .clock-nav { display: flex; align-items: center; gap: 20px; }
-        .clock { font-size: 2.5rem; color: #FFFF00; }
+        /* Fixed Form at the Top */
+        #inputFormSection { background-color: #1A1A1A; border: 2px solid #333; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        #inputFormSection h2 { color: #00FF66; margin-bottom: 10px; font-size: 1.5rem; }
+        .form-row { display: flex; flex-wrap: wrap; gap: 10px; }
+        .form-group { flex: 1; min-width: 150px; display: flex; flex-direction: column; }
+        .form-group label { font-size: 0.8rem; color: #AAA; text-transform: uppercase; margin-bottom: 3px; font-weight: bold; }
+        .form-group input, .form-group select, .form-group textarea { padding: 8px; background-color: #2D2D2D; border: 1px solid #444; color: #FFF; border-radius: 4px; font-size: 0.9rem; }
+        .btn-add { background-color: #00FF66; color: #000; font-weight: bold; padding: 0 20px; border: none; border-radius: 4px; cursor: pointer; text-transform: uppercase; font-size: 0.9rem; height: 36px; margin-top: 15px; }
         
-        /* Navigation Utility Buttons */
-        .btn-nav { font-family: sans-serif; font-weight: bold; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; text-transform: uppercase; font-size: 1rem; }
-        .btn-report-toggle { background-color: #3399FF; color: #FFF; }
-        .btn-report-toggle:hover { background-color: #2277DD; }
-        
-        /* Grid Board Layout */
-        .board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; flex-grow: 1; min-height: 0; }
-        .column { background-color: #1E1E1E; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; border: 2px solid #333; min-height: 0; }
-        .column-header { font-size: 1.6rem; text-align: center; padding-bottom: 10px; margin-bottom: 10px; border-bottom: 3px solid; flex-shrink: 0; }
-        
-        /* Column Themes */
+        /* Reports bar */
+        #reportsSection { display: flex; gap: 15px; margin-bottom: 20px; background: #222; padding: 10px; border-radius: 4px; border: 1px solid #333; }
+        .rep-box { font-size: 1rem; color: #3399FF; font-weight: bold; }
+        .rep-box span { color: #FFF; background: #111; padding: 2px 6px; border-radius: 3px; margin-left: 5px; }
+
+        /* Columns Grid */
+        .board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+        .column { background-color: #1E1E1E; border: 2px solid #333; border-radius: 6px; padding: 10px; min-height: 400px; }
+        .column-header { text-align: center; font-size: 1.3rem; font-weight: bold; padding-bottom: 8px; margin-bottom: 10px; border-bottom: 2px solid; }
         .col-urgent { border-color: #FF3333; } .col-urgent .column-header { color: #FF3333; }
         .col-standard { border-color: #3399FF; } .col-standard .column-header { color: #3399FF; }
         .col-freight { border-color: #FF9900; } .col-freight .column-header { color: #FF9900; }
         .col-shipped { border-color: #00FF66; } .col-shipped .column-header { color: #00FF66; }
         
-        /* Cards Lists */
-        .card-list { flex-grow: 1; overflow-y: auto; padding-right: 4px; }
-        .card { background-color: #2D2D2D; border: 1px solid #444; padding: 12px; margin-bottom: 12px; border-radius: 6px; }
-        .card-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
-        .project-title { font-size: 1.4rem; color: #FFF; text-transform: uppercase; width: 65%; word-break: break-word; }
-        .so-number { font-size: 1.2rem; color: #00FF66; background-color: #121212; padding: 2px 6px; border-radius: 4px; font-family: monospace; }
-        .account-name { font-size: 1.2rem; color: #FF9900; font-family: sans-serif; font-weight: bold; margin-bottom: 6px; }
+        /* Individual Order Cards */
+        .card { background-color: #2D2D2D; border: 1px solid #444; padding: 10px; margin-bottom: 10px; border-radius: 4px; }
+        .card-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
+        .proj { font-weight: bold; color: #FFF; font-size: 1.1rem; text-transform: uppercase; }
+        .so { color: #00FF66; font-family: monospace; font-size: 1rem; }
+        .acc { color: #FF9900; font-weight: bold; font-size: 0.9rem; margin-bottom: 4px; }
+        .sdate { font-size: 0.85rem; color: #CCC; margin-bottom: 6px; }
+        .notes { background-color: #1A1A1A; padding: 5px; border-radius: 3px; font-size: 0.85rem; color: #FFF; border: 1px solid #333; margin-bottom: 8px; }
+        .notes span { color: #FFFF00; font-weight: bold; font-size: 0.75rem; text-transform: uppercase; }
         
-        /* Card Data Fields */
-        .meta-row { display: flex; gap: 15px; font-family: sans-serif; font-size: 1rem; color: #BBB; font-weight: bold; margin-bottom: 8px; }
-        .meta-label { color: #888; font-size: 0.8rem; text-transform: uppercase; display: block; }
-        .notes-box { background-color: #1A1A1A; border: 1px solid #444; padding: 6px 10px; border-radius: 4px; font-family: sans-serif; font-size: 1rem; color: #FFF; line-height: 1.3; margin-bottom: 10px; word-break: break-word; }
-        .notes-box span { color: #FFFF00; font-weight: bold; font-size: 0.8rem; text-transform: uppercase; }
-        
-        /* Card Action Control Layout */
-        .card-actions { display: flex; gap: 8px; justify-content: flex-end; }
-        .btn-action { font-family: sans-serif; font-weight: bold; padding: 6px 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85rem; text-transform: uppercase; }
-        .btn-move { background-color: #444; color: #FFF; } .btn-move:hover { background-color: #555; }
-        .btn-del { background-color: #552222; color: #FFAAAA; } .btn-del:hover { background-color: #773333; }
-        
-        /* FIXED: Centered Popup Windows (Modals) */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: center; }
-        .modal-overlay.open { display: flex; }
-        .modal-content { background-color: #1A1A1A; border: 4px solid #333; border-radius: 12px; width: 500px; max-width: 90%; padding: 25px; max-height: 90vh; overflow-y: auto; font-family: sans-serif; }
-        h2 { font-size: 1.8rem; color: #00FF66; margin-bottom: 15px; font-family: 'Arial Black', sans-serif; border-bottom: 2px solid #333; padding-bottom: 8px; }
-        
-        /* Forms Configuration */
-        .form-group { margin-bottom: 12px; }
-        .form-group label { display: block; color: #AAA; font-size: 0.9rem; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
-        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px; background-color: #2D2D2D; border: 1px solid #444; color: #FFF; border-radius: 4px; font-size: 1rem; }
-        .btn-submit { width: 100%; padding: 12px; background-color: #00FF66; color: #000; font-weight: bold; border: none; border-radius: 4px; font-size: 1.1rem; cursor: pointer; text-transform: uppercase; margin-top: 10px; }
-        .btn-submit:hover { background-color: #00CC52; }
-        
-        /* Report Widget Elements */
-        .metric-card { background-color: #252525; padding: 15px; border-radius: 6px; border-left: 6px solid #3399FF; margin-bottom: 15px; }
-        .metric-label { font-size: 0.9rem; color: #888; text-transform: uppercase; font-weight: bold; }
-        .metric-value { font-size: 2.2rem; font-family: 'Arial Black', sans-serif; color: #FFF; margin-top: 5px; }
-        
-        /* Floating Trigger Controls */
-        .controls-container { position: fixed; bottom: 15px; right: 15px; display: flex; gap: 10px; z-index: 1001; }
-        .btn-float { background-color: #00FF66; color: #000; font-family: sans-serif; font-weight: bold; padding: 12px 20px; border-radius: 50px; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.5); font-size: 1rem; text-transform: uppercase; }
-        .btn-float:hover { scale: 1.05; background-color: #00CC52; }
+        /* Card Action Controls */
+        .actions { display: flex; justify-content: flex-end; gap: 5px; }
+        .btn-action { padding: 4px 8px; font-size: 0.75rem; font-weight: bold; border: none; border-radius: 3px; cursor: pointer; text-transform: uppercase; }
+        .btn-ship { background-color: #444; color: #FFF; }
+        .btn-del { background-color: #552222; color: #FFAAAA; }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>DAILY DISPATCH MONITOR</h1>
-        <div class="clock-nav">
-            <button class="btn-nav btn-report-toggle" onclick="openPanel('reportPanel')">📊 View Reports</button>
-            <div class="clock" id="liveClock">00:00:00 AM</div>
-        </div>
-    </header>
-
-    <div class="board">
-        <div class="column col-urgent">
-            <div class="column-header">🔴 CRITICAL / AIR</div>
-            <div class="card-list" id="col-urgent"></div>
-        </div>
-        <div class="column col-standard">
-            <div class="column-header">🔵 STANDARD GROUND</div>
-            <div class="card-list" id="col-standard"></div>
-        </div>
-        <div class="column col-freight">
-            <div class="column-header">🟠 LTL FREIGHT</div>
-            <div class="card-list" id="col-freight"></div>
-        </div>
-        <div class="column col-shipped">
-            <div class="column-header">🟢 SHIPPED TODAY</div>
-            <div class="card-list" id="col-shipped"></div>
-        </div>
-    </div>
-
-    <!-- Floating System Hotkeys -->
-    <div class="controls-container">
-        <button class="btn-float" style="background-color: #3399FF; color: white;" onclick="openPanel('reportPanel')">📊 Reports</button>
-        <button class="btn-float" onclick="openPanel('adminPanel')">⚙️ Edit Orders</button>
-    </div>
-
-    <!-- FIXED CENTER POPUP: Input Center Form Panel -->
-    <div id="adminPanel" class="modal-overlay">
-        <div class="modal-content">
-            <h2>Add New Order</h2>
-            <form id="orderForm" onsubmit="addOrder(event)">
+    <!-- PERMANENT FORM AT TOP: Cannot Be Blocked or Off-Screen -->
+    <div id="inputFormSection">
+        <h2>📦 Add Order to Dashboard</h2>
+        <form id="orderForm" onsubmit="addOrder(event)">
+            <div class="form-row">
                 <div class="form-group">
-                    <label>Queue / Type</label>
+                    <label>Type / Queue</label>
                     <select id="formType" required>
                         <option value="urgent">🔴 Critical / Air</option>
                         <option value="standard" selected>🔵 Standard Ground</option>
@@ -123,7 +64,7 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Project Name</label>
+                    <label>Project</label>
                     <input type="text" id="formProject" required>
                 </div>
                 <div class="form-group">
@@ -131,29 +72,119 @@
                     <input type="text" id="formSO" required>
                 </div>
                 <div class="form-group">
-                    <label>Account</label>
+                    <label>Account Name</label>
                     <input type="text" id="formAccount" required>
                 </div>
                 <div class="form-group">
                     <label>Ship Date</label>
                     <input type="text" id="formShipDate" placeholder="e.g. TODAY" required>
                 </div>
-                <div class="form-group">
+                <div class="form-group" style="flex: 2;">
                     <label>Notes</label>
-                    <textarea id="formNotes" rows="3"></textarea>
+                    <textarea id="formNotes" rows="1"></textarea>
                 </div>
-                <button type="submit" class="btn-submit">Add To Monitor</button>
-            </form>
-            <button class="btn-submit" style="background-color:#444; color:#FFF; margin-top:15px;" onclick="closePanel('adminPanel')">Close</button>
+                <button type="submit" class="btn-add">Add</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- PERMANENT STATS BAR: No Popups Needed -->
+    <div id="reportsSection">
+        <div class="rep-box">Shipped Today:<span id="rep-daily">0</span></div>
+        <div class="rep-box">This Week:<span id="rep-weekly">0</span></div>
+        <div class="rep-box">This Month:<span id="rep-monthly">0</span></div>
+        <div class="rep-box">This Year:<span id="rep-yearly">0</span></div>
+        <button onclick="clearHistoryData()" style="background:#442222; color:#FFAAAA; border:none; padding:2px 6px; border-radius:3px; cursor:pointer; font-size:0.75rem; margin-left:auto;">Reset Stats</button>
+    </div>
+
+    <!-- The 4 Columns -->
+    <div class="board">
+        <div class="column col-urgent">
+            <div class="column-header">🔴 CRITICAL / AIR</div>
+            <div id="col-urgent"></div>
+        </div>
+        <div class="column col-standard">
+            <div class="column-header">🔵 STANDARD GROUND</div>
+            <div id="col-standard"></div>
+        </div>
+        <div class="column col-freight">
+            <div class="column-header">🟠 LTL FREIGHT</div>
+            <div id="col-freight"></div>
+        </div>
+        <div class="column col-shipped">
+            <div class="column-header">🟢 SHIPPED TODAY</div>
+            <div id="col-shipped"></div>
         </div>
     </div>
 
-    <!-- FIXED CENTER POPUP: Live Reporting Analytics Display Overlays -->
-    <div id="reportPanel" class="modal-overlay">
-        <div class="modal-content">
-            <h2>Fulfillment Analytics</h2>
-            
-            <div class="metric-card" style="border-color: #00FF66;">
-                <div class="metric-label">Shipped Today</div>
-                <div class="metric-value" id="rep-daily">0</div>
-            </div>
+    <script>
+        let orders = JSON.parse(localStorage.getItem('shipping_orders')) || [];
+        let historicalLogs = JSON.parse(localStorage.getItem('shipping_history')) || [];
+
+        function saveToStorage() {
+            localStorage.setItem('shipping_orders', JSON.stringify(orders));
+            localStorage.setItem('shipping_history', JSON.stringify(historicalLogs));
+            renderBoard();
+            calculateMetrics();
+        }
+
+        function addOrder(e) {
+            e.preventDefault();
+            const newOrder = {
+                id: Date.now(),
+                type: document.getElementById('formType').value,
+                project: document.getElementById('formProject').value,
+                so: document.getElementById('formSO').value,
+                account: document.getElementById('formAccount').value,
+                shipDate: document.getElementById('formShipDate').value,
+                notes: document.getElementById('formNotes').value || 'N/A',
+                timestampShipped: null
+            };
+            orders.push(newOrder);
+            saveToStorage();
+            document.getElementById('orderForm').reset();
+        }
+
+        function executeShipment(id) {
+            const index = orders.findIndex(o => o.id === id);
+            if (index !== -1) {
+                let shippedItem = orders[index];
+                shippedItem.type = 'shipped';
+                shippedItem.timestampShipped = Date.now();
+                historicalLogs.push({...shippedItem});
+                saveToStorage();
+            }
+        }
+
+        function deleteOrder(id) {
+            if(confirm("Delete this card?")) {
+                orders = orders.filter(o => o.id !== id);
+                saveToStorage();
+            }
+        }
+
+        function clearHistoryData() {
+            if(confirm("Wipe out all shipping history stats permanently?")) {
+                historicalLogs = [];
+                orders = orders.filter(o => o.type !== 'shipped');
+                saveToStorage();
+            }
+        }
+
+        function calculateMetrics() {
+            const now = Date.now();
+            const oneDay = 24 * 60 * 60 * 1000;
+            document.getElementById('rep-daily').innerText = historicalLogs.filter(log => (now - log.timestampShipped) <= oneDay).length;
+            document.getElementById('rep-weekly').innerText = historicalLogs.filter(log => (now - log.timestampShipped) <= (7 * oneDay)).length;
+            document.getElementById('rep-monthly').innerText = historicalLogs.filter(log => (now - log.timestampShipped) <= (30 * oneDay)).length;
+            document.getElementById('rep-yearly').innerText = historicalLogs.filter(log => (now - log.timestampShipped) <= (365 * oneDay)).length;
+        }
+
+        function renderBoard() {
+            document.getElementById('col-urgent').innerHTML = '';
+            document.getElementById('col-standard').innerHTML = '';
+            document.getElementById('col-freight').innerHTML = '';
+            document.getElementById('col-shipped').innerHTML = '';
+
+            const now = Date.now();
+            orders = orders.filter(order => {
