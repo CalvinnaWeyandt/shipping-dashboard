@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daily Shipping Monitor</title>
+    <title>Daily Shipping Monitor & Analytics</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Arial Black', sans-serif; background-color: #121212; color: #FFFFFF; padding: 15px; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
@@ -11,9 +11,15 @@
         /* Layout Header */
         header { display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid #333; padding-bottom: 10px; margin-bottom: 15px; flex-shrink: 0; }
         h1 { font-size: 2.5rem; color: #00FF66; letter-spacing: 1px; }
+        .clock-nav { display: flex; align-items: center; gap: 20px; }
         .clock { font-size: 2.5rem; color: #FFFF00; }
         
-        /* Grid Layout */
+        /* Navigation Utility Buttons */
+        .btn-nav { font-family: sans-serif; font-weight: bold; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; text-transform: uppercase; font-size: 1rem; }
+        .btn-report-toggle { background-color: #3399FF; color: #FFF; }
+        .btn-report-toggle:hover { background-color: #2277DD; }
+        
+        /* Grid Board Layout */
         .board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; flex-grow: 1; min-height: 0; }
         .column { background-color: #1E1E1E; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; border: 2px solid #333; min-height: 0; }
         .column-header { font-size: 1.6rem; text-align: center; padding-bottom: 10px; margin-bottom: 10px; border-bottom: 3px solid; flex-shrink: 0; }
@@ -24,83 +30,84 @@
         .col-freight { border-color: #FF9900; } .col-freight .column-header { color: #FF9900; }
         .col-shipped { border-color: #00FF66; } .col-shipped .column-header { color: #00FF66; }
         
-        /* Order Cards Container */
+        /* Cards Lists */
         .card-list { flex-grow: 1; overflow-y: auto; padding-right: 4px; }
-        
-        /* Order Cards */
-        .card { background-color: #2D2D2D; border: 1px solid #444; padding: 12px; margin-bottom: 12px; border-radius: 6px; position: relative; }
+        .card { background-color: #2D2D2D; border: 1px solid #444; padding: 12px; margin-bottom: 12px; border-radius: 6px; }
         .card-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
         .project-title { font-size: 1.4rem; color: #FFF; text-transform: uppercase; width: 65%; word-break: break-word; }
         .so-number { font-size: 1.2rem; color: #00FF66; background-color: #121212; padding: 2px 6px; border-radius: 4px; font-family: monospace; }
         .account-name { font-size: 1.2rem; color: #FF9900; font-family: sans-serif; font-weight: bold; margin-bottom: 6px; }
         
-        /* Meta/Notes styling */
+        /* Card Data Fields */
         .meta-row { display: flex; gap: 15px; font-family: sans-serif; font-size: 1rem; color: #BBB; font-weight: bold; margin-bottom: 8px; }
         .meta-label { color: #888; font-size: 0.8rem; text-transform: uppercase; display: block; }
         .notes-box { background-color: #1A1A1A; border: 1px solid #444; padding: 6px 10px; border-radius: 4px; font-family: sans-serif; font-size: 1rem; color: #FFF; line-height: 1.3; margin-bottom: 10px; word-break: break-word; }
         .notes-box span { color: #FFFF00; font-weight: bold; font-size: 0.8rem; text-transform: uppercase; }
         
-        /* Internal Card Controls */
+        /* Card Action Control Layout */
         .card-actions { display: flex; gap: 8px; justify-content: flex-end; }
         .btn-action { font-family: sans-serif; font-weight: bold; padding: 6px 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85rem; text-transform: uppercase; }
-        .btn-move { background-color: #444; color: #FFF; }
-        .btn-move:hover { background-color: #555; }
-        .btn-del { background-color: #552222; color: #FFAAAA; }
-        .btn-del:hover { background-color: #773333; }
+        .btn-move { background-color: #444; color: #FFF; } .btn-move:hover { background-color: #555; }
+        .btn-del { background-color: #552222; color: #FFAAAA; } .btn-del:hover { background-color: #773333; }
         
-        /* Admin Form (Collapsible sidebar) */
-        #adminPanel { position: fixed; top: 0; right: -420px; width: 400px; height: 100vh; background-color: #1A1A1A; border-left: 4px solid #333; padding: 20px; box-shadow: -5px 0 20px rgba(0,0,0,0.7); transition: right 0.3s ease; z-index: 1000; overflow-y: auto; font-family: sans-serif; }
-        #adminPanel.open { right: 0; }
-        #adminPanel h2 { font-size: 1.8rem; color: #00FF66; margin-bottom: 15px; font-family: 'Arial Black', sans-serif; }
+        /* Floating Modals and Input Panels */
+        #adminPanel, #reportPanel { position: fixed; top: 0; right: -420px; width: 400px; height: 100vh; background-color: #1A1A1A; border-left: 4px solid #333; padding: 20px; box-shadow: -5px 0 20px rgba(0,0,0,0.7); transition: right 0.3s ease; z-index: 1000; overflow-y: auto; font-family: sans-serif; }
+        #adminPanel.open, #reportPanel.open { right: 0; }
+        h2 { font-size: 1.8rem; color: #00FF66; margin-bottom: 15px; font-family: 'Arial Black', sans-serif; border-bottom: 2px solid #333; padding-bottom: 8px; }
+        
+        /* Forms Configuration */
         .form-group { margin-bottom: 12px; }
         .form-group label { display: block; color: #AAA; font-size: 0.9rem; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
         .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px; background-color: #2D2D2D; border: 1px solid #444; color: #FFF; border-radius: 4px; font-size: 1rem; }
-        .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: #00FF66; outline: none; }
         .btn-submit { width: 100%; padding: 12px; background-color: #00FF66; color: #000; font-weight: bold; border: none; border-radius: 4px; font-size: 1.1rem; cursor: pointer; text-transform: uppercase; margin-top: 10px; }
-        .btn-submit:hover { background-color: #00CC52; }
         
-        /* Toggle Button */
-        .toggle-admin-btn { position: fixed; bottom: 15px; right: 15px; background-color: #00FF66; color: #000; font-family: sans-serif; font-weight: bold; padding: 12px 20px; border-radius: 50px; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.5); z-index: 1001; font-size: 1rem; text-transform: uppercase; }
-        .toggle-admin-btn:hover { background-color: #00CC52; scale: 1.05; }
+        /* Report Widget Elements */
+        .metric-card { background-color: #252525; padding: 15px; border-radius: 6px; border-left: 6px solid #3399FF; margin-bottom: 15px; }
+        .metric-label { font-size: 0.9rem; color: #888; text-transform: uppercase; font-weight: bold; }
+        .metric-value { font-size: 2.2rem; font-family: 'Arial Black', sans-serif; color: #FFF; margin-top: 5px; }
+        
+        /* Floating Trigger Controls */
+        .controls-container { position: fixed; bottom: 15px; right: 15px; display: flex; gap: 10px; z-index: 1001; }
+        .btn-float { background-color: #00FF66; color: #000; font-family: sans-serif; font-weight: bold; padding: 12px 20px; border-radius: 50px; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.5); font-size: 1rem; text-transform: uppercase; }
+        .btn-float:hover { scale: 1.05; }
     </style>
 </head>
 <body>
 
     <header>
         <h1>DAILY DISPATCH MONITOR</h1>
-        <div class="clock" id="liveClock">00:00:00 AM</div>
+        <div class="clock-nav">
+            <button class="btn-nav btn-report-toggle" onclick="togglePanel('reportPanel')">📊 View Reports</button>
+            <div class="clock" id="liveClock">00:00:00 AM</div>
+        </div>
     </header>
 
     <div class="board">
-        <!-- COLUMN 1: EXPEDITED -->
         <div class="column col-urgent">
             <div class="column-header">🔴 CRITICAL / AIR</div>
             <div class="card-list" id="col-urgent"></div>
         </div>
-
-        <!-- COLUMN 2: STANDARD GROUND -->
         <div class="column col-standard">
             <div class="column-header">🔵 STANDARD GROUND</div>
             <div class="card-list" id="col-standard"></div>
         </div>
-
-        <!-- COLUMN 3: LTL FREIGHT -->
         <div class="column col-freight">
             <div class="column-header">🟠 LTL FREIGHT</div>
             <div class="card-list" id="col-freight"></div>
         </div>
-
-        <!-- COLUMN 4: SHIPPED -->
         <div class="column col-shipped">
             <div class="column-header">🟢 SHIPPED TODAY</div>
             <div class="card-list" id="col-shipped"></div>
         </div>
     </div>
 
-    <!-- Toggle Controls Button -->
-    <button class="toggle-admin-btn" onclick="toggleAdmin()">⚙️ Edit Orders</button>
+    <!-- Floating System Hotkeys -->
+    <div class="controls-container">
+        <button class="btn-float" style="background-color: #3399FF; color: white;" onclick="togglePanel('reportPanel')">📊 Reports</button>
+        <button class="btn-float" onclick="togglePanel('adminPanel')">⚙️ Edit Orders</button>
+    </div>
 
-    <!-- Slide-out Admin Input Panel -->
+    <!-- Input Center Form Panel -->
     <div id="adminPanel">
         <h2>Add New Order</h2>
         <form id="orderForm" onsubmit="addOrder(event)">
@@ -110,71 +117,47 @@
                     <option value="urgent">🔴 Critical / Air</option>
                     <option value="standard" selected>🔵 Standard Ground</option>
                     <option value="freight">🟠 LTL Freight</option>
-                    <option value="shipped">🟢 Shipped Today</option>
                 </select>
             </div>
             <div class="form-group">
                 <label>Project Name</label>
-                <input type="text" id="formProject" placeholder="e.g. Metro Tower Phase 2" required>
+                <input type="text" id="formProject" required>
             </div>
             <div class="form-group">
                 <label>Sales Order #</label>
-                <input type="text" id="formSO" placeholder="e.g. SO-99214" required>
+                <input type="text" id="formSO" required>
             </div>
             <div class="form-group">
                 <label>Account</label>
-                <input type="text" id="formAccount" placeholder="e.g. Apex Mechanical" required>
+                <input type="text" id="formAccount" required>
             </div>
             <div class="form-group">
                 <label>Ship Date</label>
-                <input type="text" id="formShipDate" placeholder="e.g. TODAY (AM), TOMORROW" required>
+                <input type="text" id="formShipDate" placeholder="e.g. TODAY" required>
             </div>
             <div class="form-group">
                 <label>Notes</label>
-                <textarea id="formNotes" rows="3" placeholder="Special instructions, carrier info, missing items..."></textarea>
+                <textarea id="formNotes" rows="3"></textarea>
             </div>
             <button type="submit" class="btn-submit">Add To Monitor</button>
         </form>
-        <button class="btn-submit" style="background-color:#444; color:#FFF; margin-top:15px;" onclick="toggleAdmin()">Close Panel</button>
+        <button class="btn-submit" style="background-color:#444; color:#FFF; margin-top:15px;" onclick="togglePanel('adminPanel')">Close</button>
     </div>
 
-    <script>
-        // Store orders in browser's local memory so they save even if refreshed/closed
-        let orders = JSON.parse(localStorage.getItem('shipping_orders')) || [];
-
-        function saveToStorage() {
-            localStorage.setItem('shipping_orders', JSON.stringify(orders));
-            renderBoard();
-        }
-
-        function toggleAdmin() {
-            document.getElementById('adminPanel').classList.toggle('open');
-        }
-
-        function addOrder(e) {
-            e.preventDefault();
-            const newOrder = {
-                id: Date.now(),
-                type: document.getElementById('formType').value,
-                project: document.getElementById('formProject').value,
-                so: document.getElementById('formSO').value,
-                account: document.getElementById('formAccount').value,
-                shipDate: document.getElementById('formShipDate').value,
-                notes: document.getElementById('formNotes').value || 'N/A'
-            };
-            orders.push(newOrder);
-            saveToStorage();
-            document.getElementById('orderForm').reset();
-            toggleAdmin(); // hide panel
-        }
-
-        function moveOrder(id, nextColumn) {
-            const index = orders.findIndex(o => o.id === id);
-            if (index !== -1) {
-                orders[index].type = nextColumn;
-                saveToStorage();
-            }
-        }
-
-        function deleteOrder(id) {
-            if(confirm("Are you sure you want to delete this order card?")) {
+    <!-- Live Reporting Analytics Display Overlays -->
+    <div id="reportPanel">
+        <h2>Fulfillment Analytics</h2>
+        
+        <div class="metric-card" style="border-color: #00FF66;">
+            <div class="metric-label">Shipped Today</div>
+            <div class="metric-value" id="rep-daily">0</div>
+        </div>
+        <div class="metric-card" style="border-color: #FFFF00;">
+            <div class="metric-label">Shipped This Week (7 Days)</div>
+            <div class="metric-value" id="rep-weekly">0</div>
+        </div>
+        <div class="metric-card" style="border-color: #FF9900;">
+            <div class="metric-label">Shipped This Month (30 Days)</div>
+            <div class="metric-value" id="rep-monthly">0</div>
+        </div>
+        <div class="metric-card" style="border-color: #FF3333;">
