@@ -6,7 +6,7 @@
     <title>Daily Shipping Monitor & Analytics</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Arial Black', sans-serif; background-color: #121212; color: #FFFFFF; padding: 15px; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        body { font-family: 'Arial Black', sans-serif; background-color: #121212; color: #FFFFFF; padding: 15px; display: flex; flex-direction: column; height: 100vh; overflow: hidden; position: relative; }
         
         /* Layout Header */
         header { display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid #333; padding-bottom: 10px; margin-bottom: 15px; flex-shrink: 0; }
@@ -50,9 +50,10 @@
         .btn-move { background-color: #444; color: #FFF; } .btn-move:hover { background-color: #555; }
         .btn-del { background-color: #552222; color: #FFAAAA; } .btn-del:hover { background-color: #773333; }
         
-        /* Floating Modals and Input Panels */
-        #adminPanel, #reportPanel { position: fixed; top: 0; right: -420px; width: 400px; height: 100vh; background-color: #1A1A1A; border-left: 4px solid #333; padding: 20px; box-shadow: -5px 0 20px rgba(0,0,0,0.7); transition: right 0.3s ease; z-index: 1000; overflow-y: auto; font-family: sans-serif; }
-        #adminPanel.open, #reportPanel.open { right: 0; }
+        /* FIXED: Centered Popup Windows (Modals) */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: center; }
+        .modal-overlay.open { display: flex; }
+        .modal-content { background-color: #1A1A1A; border: 4px solid #333; border-radius: 12px; width: 500px; max-width: 90%; padding: 25px; max-height: 90vh; overflow-y: auto; font-family: sans-serif; }
         h2 { font-size: 1.8rem; color: #00FF66; margin-bottom: 15px; font-family: 'Arial Black', sans-serif; border-bottom: 2px solid #333; padding-bottom: 8px; }
         
         /* Forms Configuration */
@@ -60,6 +61,7 @@
         .form-group label { display: block; color: #AAA; font-size: 0.9rem; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
         .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px; background-color: #2D2D2D; border: 1px solid #444; color: #FFF; border-radius: 4px; font-size: 1rem; }
         .btn-submit { width: 100%; padding: 12px; background-color: #00FF66; color: #000; font-weight: bold; border: none; border-radius: 4px; font-size: 1.1rem; cursor: pointer; text-transform: uppercase; margin-top: 10px; }
+        .btn-submit:hover { background-color: #00CC52; }
         
         /* Report Widget Elements */
         .metric-card { background-color: #252525; padding: 15px; border-radius: 6px; border-left: 6px solid #3399FF; margin-bottom: 15px; }
@@ -69,7 +71,7 @@
         /* Floating Trigger Controls */
         .controls-container { position: fixed; bottom: 15px; right: 15px; display: flex; gap: 10px; z-index: 1001; }
         .btn-float { background-color: #00FF66; color: #000; font-family: sans-serif; font-weight: bold; padding: 12px 20px; border-radius: 50px; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.5); font-size: 1rem; text-transform: uppercase; }
-        .btn-float:hover { scale: 1.05; }
+        .btn-float:hover { scale: 1.05; background-color: #00CC52; }
     </style>
 </head>
 <body>
@@ -77,7 +79,7 @@
     <header>
         <h1>DAILY DISPATCH MONITOR</h1>
         <div class="clock-nav">
-            <button class="btn-nav btn-report-toggle" onclick="togglePanel('reportPanel')">📊 View Reports</button>
+            <button class="btn-nav btn-report-toggle" onclick="openPanel('reportPanel')">📊 View Reports</button>
             <div class="clock" id="liveClock">00:00:00 AM</div>
         </div>
     </header>
@@ -103,61 +105,55 @@
 
     <!-- Floating System Hotkeys -->
     <div class="controls-container">
-        <button class="btn-float" style="background-color: #3399FF; color: white;" onclick="togglePanel('reportPanel')">📊 Reports</button>
-        <button class="btn-float" onclick="togglePanel('adminPanel')">⚙️ Edit Orders</button>
+        <button class="btn-float" style="background-color: #3399FF; color: white;" onclick="openPanel('reportPanel')">📊 Reports</button>
+        <button class="btn-float" onclick="openPanel('adminPanel')">⚙️ Edit Orders</button>
     </div>
 
-    <!-- Input Center Form Panel -->
-    <div id="adminPanel">
-        <h2>Add New Order</h2>
-        <form id="orderForm" onsubmit="addOrder(event)">
-            <div class="form-group">
-                <label>Queue / Type</label>
-                <select id="formType" required>
-                    <option value="urgent">🔴 Critical / Air</option>
-                    <option value="standard" selected>🔵 Standard Ground</option>
-                    <option value="freight">🟠 LTL Freight</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Project Name</label>
-                <input type="text" id="formProject" required>
-            </div>
-            <div class="form-group">
-                <label>Sales Order #</label>
-                <input type="text" id="formSO" required>
-            </div>
-            <div class="form-group">
-                <label>Account</label>
-                <input type="text" id="formAccount" required>
-            </div>
-            <div class="form-group">
-                <label>Ship Date</label>
-                <input type="text" id="formShipDate" placeholder="e.g. TODAY" required>
-            </div>
-            <div class="form-group">
-                <label>Notes</label>
-                <textarea id="formNotes" rows="3"></textarea>
-            </div>
-            <button type="submit" class="btn-submit">Add To Monitor</button>
-        </form>
-        <button class="btn-submit" style="background-color:#444; color:#FFF; margin-top:15px;" onclick="togglePanel('adminPanel')">Close</button>
+    <!-- FIXED CENTER POPUP: Input Center Form Panel -->
+    <div id="adminPanel" class="modal-overlay">
+        <div class="modal-content">
+            <h2>Add New Order</h2>
+            <form id="orderForm" onsubmit="addOrder(event)">
+                <div class="form-group">
+                    <label>Queue / Type</label>
+                    <select id="formType" required>
+                        <option value="urgent">🔴 Critical / Air</option>
+                        <option value="standard" selected>🔵 Standard Ground</option>
+                        <option value="freight">🟠 LTL Freight</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Project Name</label>
+                    <input type="text" id="formProject" required>
+                </div>
+                <div class="form-group">
+                    <label>Sales Order #</label>
+                    <input type="text" id="formSO" required>
+                </div>
+                <div class="form-group">
+                    <label>Account</label>
+                    <input type="text" id="formAccount" required>
+                </div>
+                <div class="form-group">
+                    <label>Ship Date</label>
+                    <input type="text" id="formShipDate" placeholder="e.g. TODAY" required>
+                </div>
+                <div class="form-group">
+                    <label>Notes</label>
+                    <textarea id="formNotes" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn-submit">Add To Monitor</button>
+            </form>
+            <button class="btn-submit" style="background-color:#444; color:#FFF; margin-top:15px;" onclick="closePanel('adminPanel')">Close</button>
+        </div>
     </div>
 
-    <!-- Live Reporting Analytics Display Overlays -->
-    <div id="reportPanel">
-        <h2>Fulfillment Analytics</h2>
-        
-        <div class="metric-card" style="border-color: #00FF66;">
-            <div class="metric-label">Shipped Today</div>
-            <div class="metric-value" id="rep-daily">0</div>
-        </div>
-        <div class="metric-card" style="border-color: #FFFF00;">
-            <div class="metric-label">Shipped This Week (7 Days)</div>
-            <div class="metric-value" id="rep-weekly">0</div>
-        </div>
-        <div class="metric-card" style="border-color: #FF9900;">
-            <div class="metric-label">Shipped This Month (30 Days)</div>
-            <div class="metric-value" id="rep-monthly">0</div>
-        </div>
-        <div class="metric-card" style="border-color: #FF3333;">
+    <!-- FIXED CENTER POPUP: Live Reporting Analytics Display Overlays -->
+    <div id="reportPanel" class="modal-overlay">
+        <div class="modal-content">
+            <h2>Fulfillment Analytics</h2>
+            
+            <div class="metric-card" style="border-color: #00FF66;">
+                <div class="metric-label">Shipped Today</div>
+                <div class="metric-value" id="rep-daily">0</div>
+            </div>
