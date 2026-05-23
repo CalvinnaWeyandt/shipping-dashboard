@@ -3,26 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shipping Monitor - Fail Proof Edition</title>
+    <title>Shipping Monitor - Touch Screen Edition</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: sans-serif; background-color: #121212; color: #FFF; padding: 15px; }
         
-        /* Fixed Form at the Top */
         #inputFormSection { background-color: #1A1A1A; border: 2px solid #333; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
         #inputFormSection h2 { color: #00FF66; margin-bottom: 10px; font-size: 1.5rem; }
-        .form-row { display: flex; flex-wrap: wrap; gap: 10px; }
+        .form-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
         .form-group { flex: 1; min-width: 150px; display: flex; flex-direction: column; }
         .form-group label { font-size: 0.8rem; color: #AAA; text-transform: uppercase; margin-bottom: 3px; font-weight: bold; }
         .form-group input, .form-group select, .form-group textarea { padding: 8px; background-color: #2D2D2D; border: 1px solid #444; color: #FFF; border-radius: 4px; font-size: 0.9rem; }
-        .btn-add { background-color: #00FF66; color: #000; font-weight: bold; padding: 0 20px; border: none; border-radius: 4px; cursor: pointer; text-transform: uppercase; font-size: 0.9rem; height: 36px; margin-top: 15px; }
+        .btn-add { background-color: #00FF66; color: #000; font-weight: bold; padding: 10px 25px; border: none; border-radius: 4px; cursor: pointer; text-transform: uppercase; font-size: 0.9rem; height: 38px; }
         
-        /* Reports bar */
         #reportsSection { display: flex; gap: 15px; margin-bottom: 20px; background: #222; padding: 10px; border-radius: 4px; border: 1px solid #333; }
         .rep-box { font-size: 1rem; color: #3399FF; font-weight: bold; }
         .rep-box span { color: #FFF; background: #111; padding: 2px 6px; border-radius: 3px; margin-left: 5px; }
 
-        /* Columns Grid */
         .board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
         .column { background-color: #1E1E1E; border: 2px solid #333; border-radius: 6px; padding: 10px; min-height: 400px; }
         .column-header { text-align: center; font-size: 1.3rem; font-weight: bold; padding-bottom: 8px; margin-bottom: 10px; border-bottom: 2px solid; }
@@ -31,7 +28,6 @@
         .col-freight { border-color: #FF9900; } .col-freight .column-header { color: #FF9900; }
         .col-shipped { border-color: #00FF66; } .col-shipped .column-header { color: #00FF66; }
         
-        /* Individual Order Cards */
         .card { background-color: #2D2D2D; border: 1px solid #444; padding: 10px; margin-bottom: 10px; border-radius: 4px; }
         .card-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
         .proj { font-weight: bold; color: #FFF; font-size: 1.1rem; text-transform: uppercase; }
@@ -41,80 +37,62 @@
         .notes { background-color: #1A1A1A; padding: 5px; border-radius: 3px; font-size: 0.85rem; color: #FFF; border: 1px solid #333; margin-bottom: 8px; }
         .notes span { color: #FFFF00; font-weight: bold; font-size: 0.75rem; text-transform: uppercase; }
         
-        /* Card Action Controls */
         .actions { display: flex; justify-content: flex-end; gap: 5px; }
-        .btn-action { padding: 4px 8px; font-size: 0.75rem; font-weight: bold; border: none; border-radius: 3px; cursor: pointer; text-transform: uppercase; }
+        .btn-action { padding: 6px 12px; font-size: 0.8rem; font-weight: bold; border: none; border-radius: 3px; cursor: pointer; text-transform: uppercase; }
         .btn-ship { background-color: #444; color: #FFF; }
         .btn-del { background-color: #552222; color: #FFAAAA; }
     </style>
 </head>
 <body>
 
-    <!-- PERMANENT FORM AT TOP: Cannot Be Blocked or Off-Screen -->
     <div id="inputFormSection">
         <h2>📦 Add Order to Dashboard</h2>
-        <form id="orderForm" onsubmit="addOrder(event)">
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Type / Queue</label>
-                    <select id="formType" required>
-                        <option value="urgent">🔴 Critical / Air</option>
-                        <option value="standard" selected>🔵 Standard Ground</option>
-                        <option value="freight">🟠 LTL Freight</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Project</label>
-                    <input type="text" id="formProject" required>
-                </div>
-                <div class="form-group">
-                    <label>Sales Order #</label>
-                    <input type="text" id="formSO" required>
-                </div>
-                <div class="form-group">
-                    <label>Account Name</label>
-                    <input type="text" id="formAccount" required>
-                </div>
-                <div class="form-group">
-                    <label>Ship Date</label>
-                    <input type="text" id="formShipDate" placeholder="e.g. TODAY" required>
-                </div>
-                <div class="form-group" style="flex: 2;">
-                    <label>Notes</label>
-                    <textarea id="formNotes" rows="1"></textarea>
-                </div>
-                <button type="submit" class="btn-add">Add</button>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Type / Queue</label>
+                <select id="formType">
+                    <option value="urgent">🔴 Critical / Air</option>
+                    <option value="standard" selected>🔵 Standard Ground</option>
+                    <option value="freight">🟠 LTL Freight</option>
+                </select>
             </div>
-        </form>
+            <div class="form-group">
+                <label>Project</label>
+                <input type="text" id="formProject">
+            </div>
+            <div class="form-group">
+                <label>Sales Order #</label>
+                <input type="text" id="formSO">
+            </div>
+            <div class="form-group">
+                <label>Account Name</label>
+                <input type="text" id="formAccount">
+            </div>
+            <div class="form-group">
+                <label>Ship Date</label>
+                <input type="text" id="formShipDate" placeholder="e.g. TODAY">
+            </div>
+            <div class="form-group" style="flex: 2;">
+                <label>Notes</label>
+                <textarea id="formNotes" rows="1"></textarea>
+            </div>
+            <button type="button" class="btn-add" onclick="handleManualSubmit()">Add</button>
+        </div>
     </div>
 
-    <!-- PERMANENT STATS BAR: No Popups Needed -->
     <div id="reportsSection">
         <div class="rep-box">Shipped Today:<span id="rep-daily">0</span></div>
         <div class="rep-box">This Week:<span id="rep-weekly">0</span></div>
         <div class="rep-box">This Month:<span id="rep-monthly">0</span></div>
         <div class="rep-box">This Year:<span id="rep-yearly">0</span></div>
-        <button onclick="clearHistoryData()" style="background:#442222; color:#FFAAAA; border:none; padding:2px 6px; border-radius:3px; cursor:pointer; font-size:0.75rem; margin-left:auto;">Reset Stats</button>
+        <button onclick="clearHistoryData()" style="background:#442222; color:#FFAAAA; border:none; padding:4px 8px; border-radius:3px; cursor:pointer; font-size:0.75rem; margin-left:auto;">Reset Stats</button>
     </div>
 
-    <!-- The 4 Columns -->
     <div class="board">
-        <div class="column col-urgent">
-            <div class="column-header">🔴 CRITICAL / AIR</div>
-            <div id="col-urgent"></div>
-        </div>
-        <div class="column col-standard">
-            <div class="column-header">🔵 STANDARD GROUND</div>
-            <div id="col-standard"></div>
-        </div>
-        <div class="column col-freight">
-            <div class="column-header">🟠 LTL FREIGHT</div>
-            <div id="col-freight"></div>
-        </div>
-        <div class="column col-shipped">
-            <div class="column-header">🟢 SHIPPED TODAY</div>
-            <div id="col-shipped"></div>
-        </div>
+        <div class="column col-urgent"><div class="column-header">🔴 CRITICAL / AIR</div><div id="col-urgent"></div></div>
+        <div class="column col-standard"><div class="column-header">🔵 STANDARD GROUND</div><div id="col-standard"></div></div>
+        <div class="column col-freight"><div class="column-header">🟠 LTL FREIGHT</div><div id="col-freight"></div></div>
+        <div class="column col-shipped"><div class="column-header">🟢 SHIPPED TODAY</div><div id="col-shipped"></div></div>
     </div>
 
     <script>
@@ -128,21 +106,40 @@
             calculateMetrics();
         }
 
-        function addOrder(e) {
-            e.preventDefault();
+        // FIXED: Explicit submission capturing to bypass touch screen refresh bugs
+        function handleManualSubmit() {
+            const project = document.getElementById('formProject').value.trim();
+            const so = document.getElementById('formSO').value.trim();
+            const account = document.getElementById('formAccount').value.trim();
+            const shipDate = document.getElementById('formShipDate').value.trim();
+            const notes = document.getElementById('formNotes').value.trim() || 'N/A';
+            const type = document.getElementById('formType').value;
+
+            if (!project || !so || !account || !shipDate) {
+                alert("Please fill out all required fields (Project, SO#, Account, and Ship Date)!");
+                return;
+            }
+
             const newOrder = {
                 id: Date.now(),
-                type: document.getElementById('formType').value,
-                project: document.getElementById('formProject').value,
-                so: document.getElementById('formSO').value,
-                account: document.getElementById('formAccount').value,
-                shipDate: document.getElementById('formShipDate').value,
-                notes: document.getElementById('formNotes').value || 'N/A',
+                type: type,
+                project: project,
+                so: so,
+                account: account,
+                shipDate: shipDate,
+                notes: notes,
                 timestampShipped: null
             };
+
             orders.push(newOrder);
             saveToStorage();
-            document.getElementById('orderForm').reset();
+
+            // Clear textboxes without refreshing page
+            document.getElementById('formProject').value = '';
+            document.getElementById('formSO').value = '';
+            document.getElementById('formAccount').value = '';
+            document.getElementById('formShipDate').value = '';
+            document.getElementById('formNotes').value = '';
         }
 
         function executeShipment(id) {
@@ -184,7 +181,3 @@
             document.getElementById('col-urgent').innerHTML = '';
             document.getElementById('col-standard').innerHTML = '';
             document.getElementById('col-freight').innerHTML = '';
-            document.getElementById('col-shipped').innerHTML = '';
-
-            const now = Date.now();
-            orders = orders.filter(order => {
